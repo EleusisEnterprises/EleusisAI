@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  openai-service:
+    build: ./OpenAI
+    ports:
+      - "6000:6000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  swiper-bot:
+    build: ./Swiper
+    depends_on:
+      - openai-service
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - API_BASE_URL=${API_BASE_URL}
+      - ANNOUNCEMENT_CHANNEL_ID=${GOODBYE_CHANNEL_ID}
+      - ASK_CHANNEL_ID=${ASK_CHANNEL_ID}
