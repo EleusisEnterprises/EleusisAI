@@ -67,25 +67,10 @@ supportLevel = ta.lowest(low, supportLength)
 // Resistance using recent swing highs
 resistanceLevel = ta.highest(high, resistanceLength)
 
-// Dynamic support/resistance using a moving average
-ma = ta.sma(close, maPeriod)
-
-// Use a constant title for the moving average plot
-plot(ma, color=color.blue, linewidth=2, title="50 Period Moving Average")  // Replace with a constant string
-
 // Pivot Points Calculation (Classic)
 pivotPoint = (ta.highest(high, 1) + ta.lowest(low, 1) + close) / 3
 pivotSupport1 = pivotPoint * 2 - ta.highest(high, 1)
 pivotResistance1 = pivotPoint * 2 - ta.lowest(low, 1)
-
-// Plotting the swing-based support and resistance levels
-plot(supportLevel, color=color.green, linewidth=2, title="Support Level")
-plot(resistanceLevel, color=color.red, linewidth=2, title="Resistance Level")
-
-// Plotting Pivot Points using plot instead of hline
-plot(pivotPoint, color=color.orange, linewidth=1, title="Pivot Point", style=plot.style_line)
-plot(pivotSupport1, color=color.green, linewidth=1, title="Pivot Support 1", style=plot.style_line)
-plot(pivotResistance1, color=color.red, linewidth=1, title="Pivot Resistance 1", style=plot.style_line)
 
 // === Support and Resistance Zones for Lower Time Frames ===
 tf_in_minutes = timeframe.multiplier * (timeframe.isintraday ? 1 : (timeframe.isdaily ? 60 * 24 : 60 * 24 * 7))
