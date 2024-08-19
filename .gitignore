@@ -1,8 +1,33 @@
-*node_modules/
-*.env
-*.log
-*.pyc
-*__pycache__/
-.vscode/
-*venv/
+# Node.js specific
+node_modules/
 
+# Environment variables
+*.env
+
+# Log files
+*.log
+
+# Python specific
+*.pyc
+__pycache__/
+venv/
+
+# Visual Studio Code specific
+.vscode/
+
+# Neo4j specific (MindPalace)
+MindPalace/data/
+MindPalace/logs/
+MindPalace/import/
+MindPalace/plugins/
+
+# System specific
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.swp
+
+# Temporary files
+*.tmp
