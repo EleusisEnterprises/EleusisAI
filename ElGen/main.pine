@@ -1,0 +1,96 @@
+//@version=5
+indicator("CMY EMA Cross Strategy with Blended Background and Lower TF Support/Resistance", overlay=true)
+
+// ===== Constants and Inputs =====
+EMA_PERIOD_9 = 9
+EMA_PERIOD_21 = 21
+EMA_PERIOD_55 = 55
+
+// Define colors using RGB values
+EMA_COLOR_9 = color.new(color.rgb(0, 255, 255), 0)   // Cyan
+EMA_COLOR_21 = color.new(color.rgb(255, 255, 0), 0)  // Yellow
+EMA_COLOR_55 = color.new(color.rgb(255, 0, 255), 0)  // Magenta
+
+EMA_WIDTH_9 = 3
+EMA_WIDTH_21 = 2
+EMA_WIDTH_55 = 2
+
+MAX_OPACITY = 2   // Lowered maximum opacity for darker when EMAs are close together
+MIN_OPACITY = 50  // Increased minimum opacity for brighter when EMAs are far apart
+
+// Weekly reversal confirmation opacity
+REVERSAL_OPACITY = 40
+
+// ===== Utility Functions =====
+
+// Calculate proximity between two EMAs and clamp the value between 0 and 1
+getProximity(ema1, ema2) =>
+    proximity = 1 - (math.abs(ema1 - ema2) / ((ema1 + ema2) / 2))
+    // Clamp the value between 0 and 1 using math.min and math.max
+    math.max(0, math.min(1, proximity))
+
+// ===== Main Logic =====
+
+// Define EMAs
+ema9 = ta.ema(close, EMA_PERIOD_9)
+ema21 = ta.ema(close, EMA_PERIOD_21)
+ema55 = ta.ema(close, EMA_PERIOD_55)
+
+// Plotting the EMAs
+plot(ema9, color=EMA_COLOR_9, linewidth=EMA_WIDTH_9, title="9 EMA")
+plot(ema21, color=EMA_COLOR_21, linewidth=EMA_WIDTH_21, title="21 EMA")
+plot(ema55, color=EMA_COLOR_55, linewidth=EMA_WIDTH_55, title="55 EMA")
+
+// Calculate proximities
+proximity9_21 = getProximity(ema9, ema21)
+proximity21_55 = getProximity(ema21, ema55)
+proximity9_55 = getProximity(ema9, ema55)
+
+// Average proximity to determine overall "closeness"
+averageProximity = (proximity9_21 + proximity21_55 + proximity9_55) / 3
+
+// Reverse the opacity calculation (more spread equals brighter)
+opacity = math.round(MIN_OPACITY * averageProximity + MAX_OPACITY * (1 - averageProximity))
+
+// Create gradient background color based on EMAs' proximity
+gradientBgColor = color.new(color.white, 100 - opacity)
+
+// === Weekly Reversal Confirmation ===
+
+// Request weekly EMAs and calculate crossovers
+[weekly_ema21, weekly_ema55] = request.security(syminfo.tickerid, "W", [ta.ema(close, EMA_PERIOD_21), ta.ema(close, EMA_PERIOD_55)])
+bullishReversalConfirmed = ta.crossover(weekly_ema21, weekly_ema55)
+bearishReversalConfirmed = ta.crossunder(weekly_ema21, weekly_ema55)
+
+// Determine the reversal background color based on the weekly calculation but apply it to all timeframes
+reversalBgColor = na
+if (bullishReversalConfirmed)
+    reversalBgColor := color.new(color.green, 100 - REVERSAL_OPACITY)
+if (bearishReversalConfirmed)
+    reversalBgColor := color.new(color.red, 100 - REVERSAL_OPACITY)
+
+// Overlay the weekly reversal background color over the existing gradient background
+bgcolor(reversalBgColor, title="Weekly Reversal Background", offset=-1)
+bgcolor(gradientBgColor, title="Gradient Background", offset=-1)
+
+// ===== Support and Resistance Zones for Lower Time Frames =====
+
+// Define support and resistance lengths
+supportLength = input.int(60, title="Support Length for Lower TF")
+resistanceLength = input.int(60, title="Resistance Length for Lower TF")
+
+// Calculate support and resistance levels
+lowLevel = ta.lowest(low, supportLength)
+highLevel = ta.highest(high, resistanceLength)
+
+// Get the current timeframe in minutes
+tf_in_minutes = timeframe.multiplier * (timeframe.isintraday ? 1 : (timeframe.isdaily ? 60 * 24 : 60 * 24 * 7))
+
+// Conditionally plot support and resistance based on the time frame
+plot(tf_in_minutes <= 60 ? highLevel : na, color=color.red, linewidth=2, title="Resistance (Lower TF)")
+plot(tf_in_minutes <= 60 ? lowLevel : na, color=color.green, linewidth=2, title="Support (Lower TF)")
+
+// Fill between support and resistance levels on lower time frames
+fill(plot1=plot(tf_in_minutes <= 60 ? highLevel : na, color=color.red, linewidth=1), 
+     plot2=plot(tf_in_minutes <= 60 ? lowLevel : na, color=color.green, linewidth=1), 
+     color=color.new(color.blue, 80), title="Support/Resistance Zone (Lower TF)")

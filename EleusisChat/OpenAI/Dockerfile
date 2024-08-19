@@ -1,23 +1,27 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.8-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt /app/
-
-# Install Python dependencies globally (if necessary)
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code into the container
+# Copy the current directory contents into the container at /app
 COPY . /app
 
-# Create a virtual environment in /app/venv
-RUN python -m venv /app/venv
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies inside the virtual environment using the correct path
-RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
+# Install Tesseract OCR
+RUN apt-get update && apt-get install -y tesseract-ocr
 
-# Expose the port the application will run on
+# Set environment variables
+ENV FLASK_ENV=production
+ENV OPENAI_API_KEY=${OPENAI_API_KEY}
+
+# Make port 6000 available to the world outside this container
 EXPOSE 6000
+
+# Define environment variable
+ENV NAME World
+
+# Run app.py when the container launches
+CMD ["python", "main.py"]

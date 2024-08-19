@@ -5,14 +5,15 @@ services:
     ports:
       - "6000:6000"
     environment:
+      - FLASK_ENV=development
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-
+    volumes:
+      - ./OpenAI:/app
   swiper-bot:
     build: ./Swiper
-    depends_on:
-      - openai-service
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - API_BASE_URL=${API_BASE_URL}
-      - ANNOUNCEMENT_CHANNEL_ID=${GOODBYE_CHANNEL_ID}
-      - ASK_CHANNEL_ID=${ASK_CHANNEL_ID}
+      - API_BASE_URL=http://openai-service:6000
+      - ANNOUNCEMENTS_CHANNEL_ID=${ANNOUNCEMENTS_CHANNEL_ID:-""}
+    depends_on:
+      - openai-service  # Add this line to ensure openai-service starts first

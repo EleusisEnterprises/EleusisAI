@@ -1,0 +1,22 @@
+# Pine Script Project: Enhanced EMA Cross Strategy
+
+This project contains a Pine Script indicator for TradingView that enhances the EMA cross strategy with a gradient background to represent HTF trends more effectively. The project is structured to be modular and easy to manage within VS Code.
+
+## Files
+
+- `main.pine`: The main script where the indicator logic is defined.
+- `utils.pine`: Contains utility functions to avoid redundancy in the main script.
+- `constants.pine`: Stores constants, colors, and input parameters used across the project.
+- `README.md`: This file, providing an overview of the project.
+
+## Usage
+
+1. **Clone the repository** and open the project in VS Code with the Pine Script add-on.
+2. **Modify** the `constants.pine` file to adjust colors, EMA periods, or any other constants.
+3. **Edit** the `main.pine` script if you want to change the core logic.
+4. **Use** the `utils.pine` file to add or modify utility functions.
+
+## Customization
+
+- **Gradient Background**: Adjust `getGradient()` in `utils.pine` for different gradient logic.
+- **Support/Resistance**: Customize `plotSupportResistance()` in `utils.pine`.
