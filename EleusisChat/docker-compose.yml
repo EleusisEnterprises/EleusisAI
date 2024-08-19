@@ -27,6 +27,23 @@ services:
     networks:
       - eleusis-network
 
+  # Service 3: Neo4j
+  neo4j:
+    image: neo4j:5.3.0
+    container_name: neo4j
+    ports:
+      - "7474:7474"  # HTTP access to Neo4j browser
+      - "7687:7687"  # Bolt protocol for Neo4j driver
+    environment:
+      - NEO4J_AUTH=neo4j/test
+    volumes:
+      - ./MindPalace/data:/data  # Persist data
+      - ./MindPalace/logs:/logs  # Persist logs
+      - ./MindPalace/import:/var/lib/neo4j/import  # Folder for imports
+      - ./MindPalace/plugins:/plugins  # Plugins folder
+    networks:
+      - eleusis-network
+
 networks:
   eleusis-network:
     driver: bridge
