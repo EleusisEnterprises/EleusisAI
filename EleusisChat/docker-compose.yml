@@ -1,19 +1,32 @@
 version: '3.8'
+
 services:
   openai-service:
-    build: ./OpenAI
+    build:
+      context: ./OpenAI
     ports:
       - "6000:6000"
     environment:
-      - FLASK_ENV=development
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./OpenAI:/app
-  swiper-bot:
-    build: ./Swiper
+    networks:
+      - eleusis-network
+
+  elly-bot:
+    build:
+      context: ./Elly
+    command: node index.js
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - API_BASE_URL=http://openai-service:6000
-      - ANNOUNCEMENTS_CHANNEL_ID=${ANNOUNCEMENTS_CHANNEL_ID:-""}
-    depends_on:
-      - openai-service  # Add this line to ensure openai-service starts first
+      - ANNOUNCEMENTS_CHANNEL_ID=${ANNOUNCEMENTS_CHANNEL_ID}
+      - ASK_CHANNEL_ID=${ASK_CHANNEL_ID}
+    volumes:
+      - ./Elly:/app
+    networks:
+      - eleusis-network
+
+networks:
+  eleusis-network:
+    driver: bridge
