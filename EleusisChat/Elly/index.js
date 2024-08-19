@@ -35,7 +35,7 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction.';
+        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction. at the end mention that they can ask you anything in the ask channel by using the command !ask';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });

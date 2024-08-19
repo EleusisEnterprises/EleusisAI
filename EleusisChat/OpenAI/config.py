@@ -1,9 +1,5 @@
 import os
 from dotenv import load_dotenv
-import pytesseract
-
-# Specify the path to the Tesseract executable
-pytesseract.pytesseract.tesseract_cmd ='/usr/bin/tesseract'  # Update if necessary
 
 # Load environment variables from .env file
 load_dotenv()
