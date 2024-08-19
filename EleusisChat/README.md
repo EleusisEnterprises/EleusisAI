@@ -1,4 +1,4 @@
-# EleusisChat
+git # EleusisChat
 
 **EleusisChat** is a dynamic communication tool that leverages OpenAI's language models to interact with users in real-time through platforms like Discord. It serves as a bridge between natural language processing and conversational AI, allowing for seamless and intelligent interaction within a server environment.
 
