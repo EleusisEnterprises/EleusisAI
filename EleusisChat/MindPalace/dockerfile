@@ -1,6 +1,8 @@
 # Use an official Python runtime as a parent image
 FROM python:3.10-slim
 
+ENV PYTHONPATH=/app:/app/MindPalace
+
 # Set environment variables
 # These can be overridden by values provided by the Docker Compose or .env file
 ENV NEO4J_URI=$NEO4J_URI \
@@ -10,15 +12,15 @@ ENV NEO4J_URI=$NEO4J_URI \
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy all necessary files, including main.py, to the /app directory
 COPY . /app
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Add wait-for-it script
-ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
+# Make wait-for-it.sh executable
+COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
-# Run the wait-for-it script before starting the application
-CMD ["/bin/bash", "-c", "/wait-for-it.sh neo4j:7687 -- python test_connection.py"]
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set the entry point
+CMD ["./wait-for-it.sh", "neo4j:7687", "--timeout=30", "--", "python", "main.py"]
