@@ -14,7 +14,7 @@ def generate_response(prompt):
                 {"role": "system", "content": ""},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=150
+            max_tokens=1000
         )
         logger.info(f"OpenAI response: {response}")
         return response['choices'][0]['message']['content']

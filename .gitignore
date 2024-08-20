@@ -16,10 +16,11 @@ venv/
 .vscode/
 
 # Neo4j specific (MindPalace)
-MindPalace/data/
-MindPalace/logs/
-MindPalace/import/
-MindPalace/plugins/
+# Neo4j specific (MindPalace)
+EleusisChat/MindPalace/data/
+EleusisChat/MindPalace/logs/
+EleusisChat/MindPalace/import/
+EleusisChat/MindPalace/plugins/
 
 # System specific
 .DS_Store
