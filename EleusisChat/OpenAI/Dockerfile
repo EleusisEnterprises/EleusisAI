@@ -10,9 +10,6 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Tesseract OCR
-RUN apt-get update && apt-get install -y tesseract-ocr
-
 # Set environment variables
 ENV FLASK_ENV=production
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
