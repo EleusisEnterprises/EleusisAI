@@ -1,0 +1,56 @@
+//@version=5
+indicator("Custom Array Input", overlay=true)
+
+// Input for entry prices (using an array)
+entryPrices = array.new_float(9)
+array.set(entryPrices, 0, input(59052.8, title="Entry Price 1"))
+array.set(entryPrices, 1, input(58804.4, title="Entry Price 2"))
+array.set(entryPrices, 2, input(61005.2, title="Entry Price 3"))
+array.set(entryPrices, 3, input(60936.6, title="Entry Price 4"))
+array.set(entryPrices, 4, input(60682.5, title="Entry Price 5"))
+array.set(entryPrices, 5, input(59453.6, title="Entry Price 6"))
+array.set(entryPrices, 6, input(57250, title="Entry Price 7"))
+array.set(entryPrices, 7, input(56000, title="Entry Price 8"))
+array.set(entryPrices, 8, input(57900, title="Entry Price 9"))
+
+// Input for lots (using an array)
+lots = array.new_float(9)
+array.set(lots, 0, input(1, title="Lot 1"))
+array.set(lots, 1, input(1, title="Lot 2"))
+array.set(lots, 2, input(1, title="Lot 3"))
+array.set(lots, 3, input(1, title="Lot 4"))
+array.set(lots, 4, input(1, title="Lot 5"))
+array.set(lots, 5, input(1, title="Lot 6"))
+array.set(lots, 6, input(1, title="Lot 7"))
+array.set(lots, 7, input(3, title="Lot 8"))
+array.set(lots, 8, input(2, title="Lot 9"))
+
+// Additional UI inputs
+lotSizeUSD = input.float(100, title="Lot Size (USD)", minval=1)
+leverage = input.int(5, title="Leverage", minval=1)
+
+// Calculate the average entry price (DCA)
+totalEntryPrice = array.sum(entryPrices)
+numEntries = array.size(entryPrices)
+avgPrice = totalEntryPrice / numEntries
+
+// Calculate the total invested amount
+totalInvested = (lotSizeUSD * array.sum(lots)) * leverage
+
+// Display total invested amount
+plot(totalInvested, title="Total Invested", color=color.purple, linewidth=1, style=plot.style_circles, trackprice=true)
+
+// Calculate the lowest entry price (DCA)
+lowestEntryPrice = array.min(entryPrices)
+
+// Calculate the Highest entry price
+highestEntryPrice = array.max(entryPrices)
+
+// Display average entry price as a dashed line (ray)
+plot(avgPrice, title="Average Entry Price (DCA)", color=color.blue, linewidth=1, style=plot.style_circles, trackprice=true)
+
+// Display lowest entry price as a dashed line (ray)
+plot(lowestEntryPrice, title="Lowest Entry Price (DCA)", color=color.red, linewidth=1, style=plot.style_circles, trackprice=true)
+
+// Display highest entry price
+plot(highestEntryPrice, title="Highest Entry Price (DCA)", color=#80ff52, linewidth=1, style=plot.style_circles, trackprice=true)
