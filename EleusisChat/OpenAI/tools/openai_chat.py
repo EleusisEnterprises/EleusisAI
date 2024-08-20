@@ -1,9 +1,7 @@
 import openai
 import os
 from logger import logger
-from MindPalace.app.db import Neo4jDatabase
-
-
+from MindPalace.app.db import Neo4jDatabase  # Update this line
 
 # Initialize the Neo4j database connection
 db = Neo4jDatabase()

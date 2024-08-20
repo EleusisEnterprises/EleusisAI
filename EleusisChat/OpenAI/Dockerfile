@@ -1,24 +1,19 @@
 # Use an official Python runtime as a parent image
-FROM python:3.8-slim
+FROM python:3.10-slim
+
+ENV PYTHONPATH=/app:/app/MindPalace
+
+# Set environment variables
+ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy all necessary files, including main.py, to the /app directory
 COPY . /app
 
-# Install any needed packages specified in requirements.txt
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set environment variables
-ENV FLASK_ENV=production
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
-
-# Make port 6000 available to the world outside this container
-EXPOSE 6000
-
-# Define environment variable
-ENV NAME World
-
-# Run app.py when the container launches
+# Run main.py when the container launches
 CMD ["python", "main.py"]

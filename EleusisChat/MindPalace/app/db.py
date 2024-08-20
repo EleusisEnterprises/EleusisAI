@@ -1,5 +1,6 @@
 from neo4j import GraphDatabase
-from MindPalace.app.config import config
+from app import config, db
+# Update this line
 
 class Neo4jDatabase:
 

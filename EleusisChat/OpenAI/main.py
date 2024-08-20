@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from tools.openai_chat import generate_response
-from MindPalace.app.db import Neo4jDatabase
+import time
 from logger import logger
 from config import get_config
+from MindPalace.app import db
 
 # Load the configuration
 config = get_config()
@@ -32,9 +33,6 @@ def ask():
     except Exception as e:
         logger.error(f"Failed to process prompt: {str(e)}")
         return jsonify({'error': f"Failed to process prompt: {str(e)}"}), 500
-    
-# Initialize Neo4j database connection
-db = Neo4jDatabase()
 
 @app.route('/query', methods=['POST'])
 def query_neo4j():
