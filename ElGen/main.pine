@@ -1,83 +1,94 @@
 //@version=5
-indicator("CMY EMA Cross Strategy with Enhanced Support/Resistance Visualization", overlay=true)
+indicator("Track Highest High and Lowest Low with 100-Bar Lookback and Rays", overlay=true)
 
-// === Constants and Inputs ===
-EMA_PERIOD_9 = 9
-EMA_PERIOD_21 = 21
-EMA_PERIOD_55 = 55
+// Define EMA periods
+ema9_period = 9
+ema21_period = 21
+ema55_period = 55
 
-// Define EMA colors and widths
-EMA_COLOR_9 = color.new(color.rgb(0, 255, 255), 0)  // Cyan
-EMA_COLOR_21 = color.new(color.rgb(255, 255, 0), 0) // Yellow
-EMA_COLOR_55 = color.new(color.rgb(255, 0, 255), 0) // Magenta
-EMA_WIDTH_9 = 3
-EMA_WIDTH_21 = 2
-EMA_WIDTH_55 = 2
+// Define colors for each EMA
+color_ema9 = color.new(#00FFFF, 0) // Cyan
+color_ema21 = color.new(#FFD700, 0) // Gold
+color_ema55 = color.new(#FF00FF, 0) // Magenta
 
-MAX_OPACITY = 0
-MIN_OPACITY = 20
-REVERSAL_OPACITY = 40
+// Define background colors
+bg_color_bull = color.new(color.green, 85) // Semi-transparent green
+bg_color_bear = color.new(color.red, 85)   // Semi-transparent red
 
-// Support and Resistance Input Parameters
-supportLength = input.int(20, title="Support Length (Swing Low)")
-resistanceLength = input.int(20, title="Resistance Length (Swing High)")
-maPeriod = input.int(50, title="Moving Average Period")
+// Calculate visible EMAs (on the current chart's timeframe)
+ema9 = ta.ema(close, ema9_period)
+ema21 = ta.ema(close, ema21_period)
+ema55 = ta.ema(close, ema55_period)
 
-// === Utility Functions ===
-getProximity(ema1, ema2) =>
-    proximity = 1 - (math.abs(ema1 - ema2) / ((ema1 + ema2) / 2))
-    math.max(0, math.min(1, proximity))
+// Plot visible EMAs
+plot(ema9, title="9 EMA", color=color_ema9, linewidth=2)
+plot(ema21, title="21 EMA", color=color_ema21, linewidth=2)
+plot(ema55, title="55 EMA", color=color_ema55, linewidth=2)
 
-// === Main Logic ===
-ema9 = ta.ema(close, EMA_PERIOD_9)
-ema21 = ta.ema(close, EMA_PERIOD_21)
-ema55 = ta.ema(close, EMA_PERIOD_55)
+// Calculate EMAs on the weekly timeframe for continuity
+[weekly_ema9, weekly_ema21, weekly_ema55] = request.security(syminfo.tickerid, "W", [ta.ema(close, ema9_period), ta.ema(close, ema21_period), ta.ema(close, ema55_period)], lookahead=barmerge.lookahead_on)
 
-plot(ema9, color=EMA_COLOR_9, linewidth=EMA_WIDTH_9, title="9 EMA")
-plot(ema21, color=EMA_COLOR_21, linewidth=EMA_WIDTH_21, title="21 EMA")
-plot(ema55, color=EMA_COLOR_55, linewidth=EMA_WIDTH_55, title="55 EMA")
+// Store weekly EMA levels in variables for continuous use
+weekly_ema9_level = weekly_ema9
+weekly_ema21_level = weekly_ema21
+weekly_ema55_level = weekly_ema55
 
-proximity9_21 = getProximity(ema9, ema21)
-proximity21_55 = getProximity(ema21, ema55)
-proximity9_55 = getProximity(ema9, ema55)
+// Detect when 9 EMA crosses 55 EMA on the weekly timeframe
+cross_9_55_up = ta.crossover(weekly_ema9_level, weekly_ema55_level)
+cross_9_55_down = ta.crossunder(weekly_ema9_level, weekly_ema55_level)
 
-averageProximity = (proximity9_21 + proximity21_55 + proximity9_55) / 3
-opacity = math.round(MIN_OPACITY * averageProximity + MAX_OPACITY * (1 - averageProximity))
-gradientBgColor = color.new(color.white, 100 - opacity)
+// Detect when 21 EMA crosses 55 EMA on the weekly timeframe
+cross_21_55_up = ta.crossover(weekly_ema21_level, weekly_ema55_level)
+cross_21_55_down = ta.crossunder(weekly_ema21_level, weekly_ema55_level)
 
-[weekly_ema21, weekly_ema55] = request.security(syminfo.tickerid, "W", [ta.ema(close, EMA_PERIOD_21), ta.ema(close, EMA_PERIOD_55)])
-bullishReversalConfirmed = ta.crossover(weekly_ema21, weekly_ema55)
-bearishReversalConfirmed = ta.crossunder(weekly_ema21, weekly_ema55)
+// Confirm signals based on the prior 9/55 cross
+bear_market_confirmed = cross_21_55_down and (weekly_ema9_level < weekly_ema55_level)
+bull_market_confirmed = cross_21_55_up and (weekly_ema9_level > weekly_ema55_level)
 
-// Declare reversalBgColor as a color type variable
-var color reversalBgColor = na
+// Save signals as variables
+bear_signal = bear_market_confirmed
+bull_signal = bull_market_confirmed
 
-// Update the reversalBgColor based on the conditions
-reversalBgColor := bullishReversalConfirmed ? color.new(color.green, 100 - REVERSAL_OPACITY) : reversalBgColor
-reversalBgColor := bearishReversalConfirmed ? color.new(color.red, 100 - REVERSAL_OPACITY) : reversalBgColor
+// Initialize persistent background color state with explicit type
+var color bg_state = na
 
-// Apply the reversal background and gradient background colors to all loaded candles
-bgcolor(request.security(syminfo.tickerid, "W", reversalBgColor), title="Weekly Reversal Background", offset=0)
-bgcolor(gradientBgColor, title="Gradient Background", offset=0)
+// Assume the initial state is bullish, then update based on signals
+if (bar_index == 0)
+    bg_state := bg_color_bull
 
-// === Support and Resistance Visualization ===
-// Support using recent swing lows
-supportLevel = ta.lowest(low, supportLength)
+// Update background state based on signals
+if (bull_signal)
+    bg_state := bg_color_bull
+if (bear_signal)
+    bg_state := bg_color_bear
 
-// Resistance using recent swing highs
-resistanceLevel = ta.highest(high, resistanceLength)
+// Apply persistent background color
+bgcolor(bg_state)
 
-// Pivot Points Calculation (Classic)
-pivotPoint = (ta.highest(high, 1) + ta.lowest(low, 1) + close) / 3
-pivotSupport1 = pivotPoint * 2 - ta.highest(high, 1)
-pivotResistance1 = pivotPoint * 2 - ta.lowest(low, 1)
+// Lookback period
+lookback_period = 70
 
-// === Support and Resistance Zones for Lower Time Frames ===
-tf_in_minutes = timeframe.multiplier * (timeframe.isintraday ? 1 : (timeframe.isdaily ? 60 * 24 : 60 * 24 * 7))
+// Calculate the highest high and lowest low over the last 100 bars
+highest_high = ta.highest(high, lookback_period)
+lowest_low = ta.lowest(low, lookback_period)
 
-plot(tf_in_minutes <= 60 ? resistanceLevel : na, color=color.red, linewidth=2, title="Resistance (Lower TF)")
-plot(tf_in_minutes <= 60 ? supportLevel : na, color=color.green, linewidth=2, title="Support (Lower TF)")
+// Plot horizontal rays for highest high and lowest low
+var line hh_ray = na
+var line ll_ray = na
 
-fill(plot1=plot(tf_in_minutes <= 60 ? resistanceLevel : na, color=color.red, linewidth=1), 
-     plot2=plot(tf_in_minutes <= 60 ? supportLevel : na, color=color.green, linewidth=1), 
-     color=color.new(color.blue, 80), title="Support/Resistance Zone (Lower TF)")
+// Update or create the horizontal rays
+if (bar_index > 0) // Ensure this is not the first bar (avoiding null reference)
+    if (na(hh_ray))
+        hh_ray := line.new(x1=bar_index, y1=highest_high, x2=bar_index+1, y2=highest_high, color=color.green, width=2, extend=extend.right)
+    else
+        line.set_y1(hh_ray, highest_high)
+        line.set_y2(hh_ray, highest_high)
+
+    if (na(ll_ray))
+        ll_ray := line.new(x1=bar_index, y1=lowest_low, x2=bar_index+1, y2=lowest_low, color=color.red, width=2, extend=extend.right)
+    else
+        line.set_y1(ll_ray, lowest_low)
+        line.set_y2(ll_ray, lowest_low)
+
+// The highest_high and lowest_low variables will hold the highest high and lowest low respectively
+// These can be used for any further logic or conditions in your script.
