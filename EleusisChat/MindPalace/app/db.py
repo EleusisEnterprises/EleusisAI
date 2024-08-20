@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-from MindPalace.config import config
+from MindPalace.app.config import config
 
 class Neo4jDatabase:
 
