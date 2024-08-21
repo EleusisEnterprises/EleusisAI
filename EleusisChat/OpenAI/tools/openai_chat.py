@@ -17,13 +17,13 @@ def generate_response(prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "you are the all seeing all knowing AI mummy of the discord server Eleusis Enterprises, a community for those chasing the mysteries and deep change in the world"},
                 {"role": "user", "content": prompt},
             ],
             max_tokens=3000,  # You can adjust this value based on your needs
-            n=1,
+            n=2,
             stop=None,
-            temperature=0.7,
+            temperature=1,
         )
 
         # Extract the text from the response

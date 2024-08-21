@@ -93,6 +93,39 @@ client.on('messageCreate', async (message) => {
             message.reply('Sorry, something went wrong with your request.');
         }
     }
+
+    // Handle !pic command in any channel
+    if (message.content.startsWith('!img')) {
+        console.log('!img command detected');
+
+        const userPrompt = message.content.replace('!pic', '').trim();
+
+        if (userPrompt.length === 0) {
+            message.reply('Please provide a prompt for the image.');
+            console.log('No prompt provided by the user.');
+            return;
+        }
+
+        console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
+
+        try {
+            console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
+            const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt });
+            console.log('Full API response:', response.data);
+
+            // Check if the response has a valid content
+            if (response.data && response.data.image_url) {
+                message.reply(response.data.image_url);
+                console.log('Image URL sent to Discord.');
+            } else {
+                console.error('API response did not contain expected data.');
+                message.reply('Sorry, I did not receive a valid response from the API.');
+            }
+        } catch (error) {
+            console.error('Error calling DALL·E API:', error.message || error);
+            message.reply('Sorry, something went wrong with your image request.');
+        }
+    }
 });
 
 // Log in to Discord with your bot's token
