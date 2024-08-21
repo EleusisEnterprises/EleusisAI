@@ -15,12 +15,12 @@ def generate_response(prompt):
         
         # Make a call to OpenAI API
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=150,  # You can adjust this value based on your needs
+            max_tokens=3000,  # You can adjust this value based on your needs
             n=1,
             stop=None,
             temperature=0.7,
