@@ -94,38 +94,38 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    // Handle !pic command in any channel
-    if (message.content.startsWith('!img')) {
-        console.log('!img command detected');
+   // Handle !img command in any channel
+   if (message.content.startsWith('!img')) {
+    console.log('!img command detected');
 
-        const userPrompt = message.content.replace('!pic', '').trim();
+    const userPrompt = message.content.replace('!img', '').trim();
 
-        if (userPrompt.length === 0) {
-            message.reply('Please provide a prompt for the image.');
-            console.log('No prompt provided by the user.');
-            return;
-        }
-
-        console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
-
-        try {
-            console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
-            const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt });
-            console.log('Full API response:', response.data);
-
-            // Check if the response has a valid content
-            if (response.data && response.data.image_url) {
-                message.reply(response.data.image_url);
-                console.log('Image URL sent to Discord.');
-            } else {
-                console.error('API response did not contain expected data.');
-                message.reply('Sorry, I did not receive a valid response from the API.');
-            }
-        } catch (error) {
-            console.error('Error calling DALL·E API:', error.message || error);
-            message.reply('Sorry, something went wrong with your image request.');
-        }
+    if (userPrompt.length === 0) {
+        message.reply('Please provide a prompt for the image.');
+        console.log('No prompt provided by the user.');
+        return;
     }
+
+    console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
+
+    try {
+        console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
+        const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt }, { responseType: 'arraybuffer' });
+
+        console.log('Full API response received.');
+
+        // Create a Buffer from the response data
+        const imageBuffer = Buffer.from(response.data, 'binary');
+
+        // Send the image as an attachment
+        const attachment = new MessageAttachment(imageBuffer, 'generated_image.png');
+        message.reply({ files: [attachment] });
+        console.log('Image sent to Discord.');
+    } catch (error) {
+        console.error('Error calling DALL·E API:', error.message || error);
+        message.reply('Sorry, something went wrong with your image request.');
+    }
+}
 });
 
 // Log in to Discord with your bot's token
