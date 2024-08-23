@@ -6,29 +6,26 @@ services:
     networks:
       - eleusis-network
 
-  elly-bot-eleusis:
-    build: .
+  elly-bot:
+    build:
+      context: ./Elly
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
-    command: node EleusisChat/Elly/Eleusis_index.js
+      - ./Elly:/app
+    command: node index.js
     env_file:
       - .env
+    networks:
+      - eleusis-network
 
-  elly-bot-yorgas:
-    build: .
+  fadeblaze420-bot:
+    build:
+      context: ./FadeBlaze420
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
-    command: node EleusisChat/Elly/Yorgas_index.js
+      - ./FadeBlaze420:/app
+    command: node index.js
     env_file:
-      - .env
- 
-  web_integration:
-    build: ./WebIntegration
-    ports:
-      - "80:80"
-    environment:
-      - SERPAPI_KEY=your_actual_serpapi_key_here
-    env_file:  # Points to a .env file for environment variables
       - .env
     networks:
       - eleusis-network
@@ -36,3 +33,4 @@ services:
 networks:
   eleusis-network:
     driver: bridge
+

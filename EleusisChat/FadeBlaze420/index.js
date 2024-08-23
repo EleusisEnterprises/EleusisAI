@@ -35,12 +35,12 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'you are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generate';
+        const prompt = 'you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generayou are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please greet the yorgas accordingly when';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
 
-        const channel = await client.channels.fetch(process.env.YORGAS.ANNOUNCEMENTS_CHANNEL_ID);
+        const channel = await client.channels.fetch(process.env.YORGAS_ANNOUNCEMENTS_CHANNEL_ID);
         if (channel) {
             await channel.send(`${response.data.response} @everyone`);
             console.log('Welcome message sent successfully.');
@@ -86,7 +86,7 @@ client.on('messageCreate', async (message) => {
             }
         } else {
             // General OpenAI GPT-4 prompt
-            prompt = `When responding to a user's !ask command, ensure the answer is crafted with both deep understanding and simplicity. User's question: "${userPrompt}"`;
+            prompt = `.you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generayou are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please answer the users question acordingly. User's question: "${userPrompt}"`;
             console.log(`Sending prompt to OpenAI API: ${prompt}`);
             try {
                 response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
