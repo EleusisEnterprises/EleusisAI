@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, MessageAttachment } = require('discord.js');
 const axios = require('axios');
 
 // Create a new client instance
@@ -71,62 +71,166 @@ client.on('messageCreate', async (message) => {
 
         console.log(`User prompt extracted: ${userPrompt}`);
 
-        // Combine the guidance prompt with the user's prompt
-        const prompt = `When responding to a user's !ask command, ensure the answer is crafted with both deep understanding and simplicity. First, understand the user's question thoroughly. Then, provide an answer that captures the essence of the topic with clarity, avoiding unnecessary complexity. If applicable, use analogies or examples to make the explanation more relatable and easier to grasp. User's question: "${userPrompt}"`;
-
-        try {
-            console.log(`Sending prompt to API: ${prompt}`);
-            const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
-            console.log('Full API response:', response.data);
-            console.log('API response received:', response.data.response);
-
-            // Check if the response has a valid content
-            if (response.data && response.data.response) {
-                message.reply(response.data.response);
-                console.log('Message sent to Discord.');
-            } else {
-                console.error('API response did not contain expected data.');
-                message.reply('Sorry, I did not receive a valid response from the API.');
+        let prompt, response;
+        if (["look up", "search for", "find information on", "reasearch this subject", "search the web"].some(keyword => userPrompt.toLowerCase().includes(keyword))) {
+            // Search query detected, prepare a search prompt
+            prompt = `search for ${userPrompt}`;
+            console.log(`Sending search query to API: ${prompt}`);
+            try {
+                response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
+                console.log('Search API response received:', response.data.response);
+            } catch (error) {
+                console.error('Error calling search API:', error.message || error);
+                message.reply('Sorry, something went wrong with your search request.');
+                return;
             }
-        } catch (error) {
-            console.error('Error calling API:', error.message || error);
-            message.reply('Sorry, something went wrong with your request.');
+        } else {
+            // General OpenAI GPT-4 prompt
+            prompt = `When responding to a user's !ask command, ensure the answer is crafted with both deep understanding and simplicity. User's question: "${userPrompt}"`;
+            console.log(`Sending prompt to OpenAI API: ${prompt}`);
+            try {
+                response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
+                console.log('OpenAI API response received:', response.data.response);
+            } catch (error) {
+                console.error('Error calling OpenAI API:', error.message || error);
+                message.reply('Sorry, something went wrong with your request.');
+                return;
+            }
+        }
+
+        if (response.data && response.data.response) {
+            message.reply(response.data.response);
+            console.log('Message sent to Discord.');
+        } else {
+            console.error('API response did not contain expected data.');
+            message.reply('Sorry, I did not receive a valid response from the API.');
         }
     }
 
-   // Handle !img command in any channel
-   if (message.content.startsWith('!img')) {
-    console.log('!img command detected');
+    // Handle !img command in any channel
+    if (message.content.startsWith('!img')) {
+        console.log('!img command detected');
 
-    const userPrompt = message.content.replace('!img', '').trim();
+        const userPrompt = message.content.replace('!img', '').trim();
 
-    if (userPrompt.length === 0) {
-        message.reply('Please provide a prompt for the image.');
-        console.log('No prompt provided by the user.');
-        return;
+        if (userPrompt.length === 0) {
+            message.reply('Please provide a prompt for the image.');
+            console.log('No prompt provided by the user.');
+            return;
+        }
+
+        console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
+
+        try {
+            console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
+            const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt }, { responseType: 'arraybuffer' });
+
+            console.log('Full API response received.');
+
+            // Create a Buffer from the response data
+            const imageBuffer = Buffer.from(response.data, 'binary');
+
+            // Send the image as an attachment
+            const attachment = new MessageAttachment(imageBuffer, 'generated_image.png');
+            message.reply({ files: [attachment] });
+            console.log('Image sent to Discord.');
+        } catch (error) {
+            console.error('Error calling DALL·E API:', error.message || error);
+            message.reply('Sorry, something went wrong with your image request.');
+        }
     }
-
-    console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
-
-    try {
-        console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
-        const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt }, { responseType: 'arraybuffer' });
-
-        console.log('Full API response received.');
-
-        // Create a Buffer from the response data
-        const imageBuffer = Buffer.from(response.data, 'binary');
-
-        // Send the image as an attachment
-        const attachment = new MessageAttachment(imageBuffer, 'generated_image.png');
-        message.reply({ files: [attachment] });
-        console.log('Image sent to Discord.');
-    } catch (error) {
-        console.error('Error calling DALL·E API:', error.message || error);
-        message.reply('Sorry, something went wrong with your image request.');
-    }
-}
 });
+
+//YORGAS COMMANDS
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return; // Ignore messages from bots
+
+    console.log(`Received message: ${message.content} in channel: ${message.channel.id}`);
+
+    // Handle !ask command in a specific channel
+    if (message.content.startsWith('!ask') && message.channel.id === process.env.AInus_CHANNEL_ID) {
+        console.log('!ask command detected');
+
+        const userPrompt = message.content.replace('!ask', '').trim();
+
+        if (userPrompt.length === 0) {
+            message.reply('Please provide a question.');
+            console.log('No prompt provided by the user.');
+            return;
+        }
+
+        console.log(`User prompt extracted: ${userPrompt}`);
+
+        let prompt, response;
+        if (["look up", "search for", "find information on", "reasearch this subject", "search the web"].some(keyword => userPrompt.toLowerCase().includes(keyword))) {
+            // Search query detected, prepare a search prompt
+            prompt = `search for ${userPrompt}`;
+            console.log(`Sending search query to API: ${prompt}`);
+            try {
+                response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
+                console.log('Search API response received:', response.data.response);
+            } catch (error) {
+                console.error('Error calling search API:', error.message || error);
+                message.reply('Sorry, something went wrong with your search request.');
+                return;
+            }
+        } else {
+            // General OpenAI GPT-4 prompt
+            prompt = `You are a true blue australian polymath with a propensity for cocaine and taking the piss out of people in the true australian way. you love using the word cunt and using typical aussie slang. you are also super intelligent and can anser any question anyone has about anything, but you can also hold a good banter. User's message: "${userPrompt}"`;
+            console.log(`Sending prompt to OpenAI API: ${prompt}`);
+            try {
+                response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
+                console.log('OpenAI API response received:', response.data.response);
+            } catch (error) {
+                console.error('Error calling OpenAI API:', error.message || error);
+                message.reply('Sorry, something went wrong with your request.');
+                return;
+            }
+        }
+
+        if (response.data && response.data.response) {
+            message.reply(response.data.response);
+            console.log('Message sent to Discord.');
+        } else {
+            console.error('API response did not contain expected data.');
+            message.reply('Sorry, I did not receive a valid response from the API.');
+        }
+    }
+
+    // Handle !img command in any channel
+    if (message.content.startsWith('!img')) {
+        console.log('!img command detected');
+
+        const userPrompt = message.content.replace('!img', '').trim();
+
+        if (userPrompt.length === 0) {
+            message.reply('Please provide a prompt for the image.');
+            console.log('No prompt provided by the user.');
+            return;
+        }
+
+        console.log(`User prompt for DALL·E extracted: ${userPrompt}`);
+
+        try {
+            console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
+            const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt }, { responseType: 'arraybuffer' });
+
+            console.log('Full API response received.');
+
+            // Create a Buffer from the response data
+            const imageBuffer = Buffer.from(response.data, 'binary');
+
+            // Send the image as an attachment
+            const attachment = new MessageAttachment(imageBuffer, 'generated_image.png');
+            message.reply({ files: [attachment] });
+            console.log('Image sent to Discord.');
+        } catch (error) {
+            console.error('Error calling DALL·E API:', error.message || error);
+            message.reply('Sorry, something went wrong with your image request.');
+        }
+    }
+});
+
 
 // Log in to Discord with your bot's token
 client.login(process.env.DISCORD_BOT_TOKEN);

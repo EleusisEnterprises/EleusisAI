@@ -11,6 +11,7 @@ node_modules/
 *.pyc
 __pycache__/
 venv/
+myenv/
 
 # Visual Studio Code specific
 .vscode/
@@ -32,3 +33,5 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+
+

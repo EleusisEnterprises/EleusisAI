@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from tools.openai_chat import generate_response
-from tools.openai_dalle import generate_dalle_image  # Import the DALL·E function
+from tools.openai_dalle import generate_dalle_image
 import time
 from logger import logger
 from config import get_config
@@ -34,7 +34,6 @@ def ask():
         logger.error(f"Failed to process prompt: {str(e)}")
         return jsonify({'error': f"Failed to process prompt: {str(e)}"}), 500
 
-# New route for DALL·E image generation
 @app.route('/generate-image', methods=['POST'])
 def generate_image():
     try:

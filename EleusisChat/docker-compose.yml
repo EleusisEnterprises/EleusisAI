@@ -5,7 +5,6 @@ services:
     build: ./OpenAI
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - PYTHONPATH=/app:/app/MindPalace
     networks:
       - eleusis-network
 
@@ -20,6 +19,17 @@ services:
       - eleusis-network
     depends_on:
       - openai-service
+
+  web_integration:
+    build: ./WebIntegration
+    ports:
+      - "80:80"
+    environment:
+      - SERPAPI_KEY=your_actual_serpapi_key_here
+    env_file:  # Points to a .env file for environment variables
+      - .env
+    networks:
+      - eleusis-network
 
 networks:
   eleusis-network:
