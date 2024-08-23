@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   openai-service:
     build: ./OpenAI
@@ -8,18 +6,22 @@ services:
     networks:
       - eleusis-network
 
-  elly-bot:
-    build: ./Elly
-    environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - API_BASE_URL=http://openai-service:6000
-      - ASK_CHANNEL_ID=${ASK_CHANNEL_ID}
-      - ANNOUNCEMENTS_CHANNEL_ID=${ANNOUNCEMENTS_CHANNEL_ID}
-    networks:
-      - eleusis-network
-    depends_on:
-      - openai-service
+  elly-bot-eleusis:
+    build: .
+    volumes:
+      - .:/app
+    command: node EleusisChat/Elly/Eleusis_index.js
+    env_file:
+      - .env
 
+  elly-bot-yorgas:
+    build: .
+    volumes:
+      - .:/app
+    command: node EleusisChat/Elly/Yorgas_index.js
+    env_file:
+      - .env
+ 
   web_integration:
     build: ./WebIntegration
     ports:

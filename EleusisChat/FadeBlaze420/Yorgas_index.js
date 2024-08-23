@@ -35,12 +35,12 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction. at the end mention that they can ask you anything in the ask channel by using the command !ask';
+        const prompt = 'you are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generate';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
 
-        const channel = await client.channels.fetch(process.env.ELEUSIS_ANNOUNCEMENTS_CHANNEL_ID);
+        const channel = await client.channels.fetch(process.env.YORGAS.ANNOUNCEMENTS_CHANNEL_ID);
         if (channel) {
             await channel.send(`${response.data.response} @everyone`);
             console.log('Welcome message sent successfully.');
@@ -58,7 +58,7 @@ client.on('messageCreate', async (message) => {
     console.log(`Received message: ${message.content} in channel: ${message.channel.id}`);
 
     // Handle !ask command in a specific channel
-    if (message.content.startsWith('!ask') && message.channel.id === process.env.ELEUSIS_ASK_CHANNEL_ID) {
+    if (message.content.startsWith('!ask') && message.channel.id === process.env.YORGAS_ASK_CHANNEL_ID) {
         console.log('!ask command detected');
 
         const userPrompt = message.content.replace('!ask', '').trim();
