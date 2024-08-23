@@ -35,7 +35,7 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generayou are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please greet the yorgas accordingly when';
+        const prompt = 'you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus and youll answer anything they have to say. also let them know the !img command can be used to generate their wildest dreams dont mention eleusis enterprises';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
@@ -86,7 +86,7 @@ client.on('messageCreate', async (message) => {
             }
         } else {
             // General OpenAI GPT-4 prompt
-            prompt = `.you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus to generayou are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please answer the users question acordingly. User's question: "${userPrompt}"`;
+            prompt = `you are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please answer the users question acordingly. User's question: "${userPrompt}"`;
             console.log(`Sending prompt to OpenAI API: ${prompt}`);
             try {
                 response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
@@ -123,17 +123,17 @@ client.on('messageCreate', async (message) => {
 
         try {
             console.log(`Sending DALL·E prompt to API: ${userPrompt}`);
-            const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, { prompt: userPrompt }, { responseType: 'arraybuffer' });
+            const imageUrl = await generate_dalle_image(userPrompt);
 
-            console.log('Full API response received.');
-
-            // Create a Buffer from the response data
-            const imageBuffer = Buffer.from(response.data, 'binary');
-
-            // Send the image as an attachment
-            const attachment = new MessageAttachment(imageBuffer, 'generated_image.png');
-            message.reply({ files: [attachment] });
-            console.log('Image sent to Discord.');
+            if (typeof imageUrl === 'string') {
+                // Send the image URL as a fallback
+                message.reply(`Here is your generated image: ${imageUrl}`);
+            } else {
+                // Send the image as an attachment
+                const attachment = new MessageAttachment(imageUrl, 'generated_image.jpg');
+                message.reply({ files: [attachment] });
+                console.log('Image sent to Discord.');
+            }
         } catch (error) {
             console.error('Error calling DALL·E API:', error.message || error);
             message.reply('Sorry, something went wrong with your image request.');
@@ -141,5 +141,23 @@ client.on('messageCreate', async (message) => {
     }
 });
 
+async function generate_dalle_image(prompt) {
+    try {
+        const response = await axios.post(`http://openai-service:80/generate-image`, {
+            prompt: prompt,
+            size: '1024x1024',
+        });
+
+        const imageUrl = response.data.url;
+        const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+
+        return imageBuffer;
+    } catch (error) {
+        console.error('Error generating DALL·E image:', error.message || error);
+        return null;
+    }
+}
+
 // Log in to Discord with your bot's token
-client.login(process.env.DISCORD_BOT_TOKEN);
+client.login(process.env.FADEBLAZE_BOT_TOKEN);

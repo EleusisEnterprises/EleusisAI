@@ -17,7 +17,7 @@ def generate_response(prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4-turbo",
             messages=[
-                {"role": "system", "content": "you are the all seeing all knowing AI mummy of the discord server Eleusis Enterprises, a community for those chasing the mysteries and deep change in the world"},
+                {"role": "system", "content": ""},
                 {"role": "user", "content": prompt},
             ],
             max_tokens=3000,  # You can adjust this value based on your needs
