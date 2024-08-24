@@ -1,0 +1,38 @@
+//@version=5
+indicator("Custom Entry Lines", overlay=true)
+
+// Input for entry prices
+entryPrice1 = input.float(64212.3, title="Entry Price 1")
+entryPrice2 = input.float(63884.6, title="Entry Price 2")
+
+// Input for lot sizes (if needed in future)
+lotSize1 = input.float(2, title="Lot Size 1")
+lotSize2 = input.float(2, title="Lot Size 2")
+
+// Input for leverage (if needed in future)
+leverage = input.float(5, title="Leverage")
+
+// UI for Line Colors
+colorLowest = input.color(color.green, title="Lowest Price Line Color")
+colorHighest = input.color(color.orange, title="Highest Price Line Color")
+colorAverage = input.color(color.purple, title="Average Price Line Color")
+
+// UI for Line Thickness
+thicknessLowest = input.int(2, title="Lowest Price Line Thickness", minval=1, maxval=10)
+thicknessHighest = input.int(2, title="Highest Price Line Thickness", minval=1, maxval=10)
+thicknessAverage = input.int(2, title="Average Price Line Thickness", minval=1, maxval=10)
+
+// UI for Line Visibility
+showLowest = input.bool(true, title="Show Lowest Price Line")
+showHighest = input.bool(true, title="Show Highest Price Line")
+showAverage = input.bool(true, title="Show Average Price Line")
+
+// Calculate the lowest, highest, and average of the entry prices
+lowestPrice = math.min(entryPrice1, entryPrice2)
+highestPrice = math.max(entryPrice1, entryPrice2)
+averagePrice = (entryPrice1 + entryPrice2) / 2
+
+// Define hline objects globally with conditional visibility
+hlineLowest = hline(price=showLowest ? lowestPrice : na, title="Lowest Price Line", color=colorLowest, linewidth=thicknessLowest)
+hlineHighest = hline(price=showHighest ? highestPrice : na, title="Highest Price Line", color=colorHighest, linewidth=thicknessHighest)
+hlineAverage = hline(price=showAverage ? averagePrice : na, title="Average Price Line", color=colorAverage, linewidth=thicknessAverage)

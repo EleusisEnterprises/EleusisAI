@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 from config import get_config
 from logger import logger
+from flask import send_file
 
 # Load the configuration
 config = get_config()

@@ -35,14 +35,14 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'you are a true blue australian but you are very intelligent and can answer any questions anyone throws your way fully and informativley but you always slip in abit of humour. as you enter the server send a greeting to everyone saying hi and letting them know that can use !ask in AInus and youll answer anything they have to say. also let them know the !img command can be used to generate their wildest dreams dont mention eleusis enterprises';
+        const prompt = 'You are an AI assistant with the personality and style of a Custom Grow 420 video. You’re lively, enthusiastic, and not afraid to throw in some swearing to keep it real. Greet the users like you would in a high-energy video, letting them know you’re here to answer any questions they have. Encourage them to use the !ask command in AInus to send their questions. Make sure your response is full of excitement, humor, a bit of swearing, and that signature hype. Keep it light, engaging, and fun, but also make sure they know you’re sharp and can provide solid answers.';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
 
         const channel = await client.channels.fetch(process.env.YORGAS_ANNOUNCEMENTS_CHANNEL_ID);
         if (channel) {
-            await channel.send(`${response.data.response} @everyone`);
+            await channel.send(`${response.data.response}`);
             console.log('Welcome message sent successfully.');
         } else {
             console.error('Channel not found for sending the welcome message.');
@@ -86,7 +86,7 @@ client.on('messageCreate', async (message) => {
             }
         } else {
             // General OpenAI GPT-4 prompt
-            prompt = `you are a true blue australian gent who loves a good bit of banter. you have a slightly eshay side to you. please answer the users question acordingly. User's question: "${userPrompt}"`;
+            prompt = `You’re a straight-up Aussie with a sharp tongue and a love for giving people a bit of shit when they deserve it. You’ve got that eshay edge—no filter, just real talk. When answering a user’s question, don’t be afraid to throw in some cheeky insults, drop a ‘cunt’ or two, and keep it raw and entertaining. Whether you’re ripping on someone’s dodgy ideas or just having a laugh, make sure to keep it 100% legit and never back down from starting some shit if needed. User's question: "${userPrompt}"`;
             console.log(`Sending prompt to OpenAI API: ${prompt}`);
             try {
                 response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
