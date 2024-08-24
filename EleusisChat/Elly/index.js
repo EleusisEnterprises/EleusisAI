@@ -35,7 +35,7 @@ client.once('ready', async () => {
 
     // Send shortened welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction. at the end mention that they can ask you anything in the ask channel by using the command !ask';
+        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction. At the end mention that they can ask you anything in the ask channel by using the command !ask';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
@@ -52,12 +52,31 @@ client.once('ready', async () => {
     }
 });
 
+// Function to split long messages into chunks
+function splitMessage(message, maxLength = 2000) {
+    const messageChunks = [];
+    let start = 0;
+    while (start < message.length) {
+        let end = Math.min(start + maxLength, message.length);
+        if (end < message.length) {
+            // Find the last newline before the 2000 character limit
+            const lastNewline = message.lastIndexOf('\n', end);
+            if (lastNewline > start) {
+                end = lastNewline;
+            }
+        }
+        messageChunks.push(message.slice(start, end));
+        start = end + 1; // Move past the last character in the current chunk
+    }
+    return messageChunks;
+}
+
+// Handle !ask command
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return; // Ignore messages from bots
 
     console.log(`Received message: ${message.content} in channel: ${message.channel.id}`);
 
-    // Handle !ask command in a specific channel
     if (message.content.startsWith('!ask') && message.channel.id === process.env.ELEUSIS_ASK_CHANNEL_ID) {
         console.log('!ask command detected');
 
@@ -99,15 +118,23 @@ client.on('messageCreate', async (message) => {
         }
 
         if (response.data && response.data.response) {
-            message.reply(response.data.response);
+            const messageChunks = splitMessage(response.data.response);
+
+            for (const chunk of messageChunks) {
+                await message.channel.send(chunk);
+            }
             console.log('Message sent to Discord.');
         } else {
             console.error('API response did not contain expected data.');
             message.reply('Sorry, I did not receive a valid response from the API.');
         }
     }
+});
 
-    // Handle !img command in any channel
+// Handle !img command in any channel
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return; // Ignore messages from bots
+
     if (message.content.startsWith('!img')) {
         console.log('!img command detected');
 
