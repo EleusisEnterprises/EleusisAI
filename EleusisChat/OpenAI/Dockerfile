@@ -1,7 +1,8 @@
 # Use an official Python runtime as a parent image
 FROM python:3.10-slim
 
-ENV PYTHONPATH=/app:/app/MindPalace
+#Pass Python Root
+ENV PYTHONPATH=/app
 
 # Set environment variables
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}

@@ -33,9 +33,9 @@ client.once('ready', async () => {
 
     console.log('OpenAI server is ready. Sending welcome message...');
 
-    // Send shortened welcome message to a specific channel once the server is ready
+    // Send the welcome message to a specific channel once the server is ready
     try {
-        const prompt = 'As you enter the server, greet it with a warm and thoughtful tone. Keep the greeting friendly and brief, offering a positive start to the day or interaction. At the end mention that they can ask you anything in the ask channel by using the command !ask';
+        const prompt = 'Generate a brief and warm welcome message for new members, encouraging them to ask questions in the ask channel using the !ask command.';
 
         // Call the OpenAI service to generate the welcome message
         const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
@@ -170,7 +170,7 @@ client.on('messageCreate', async (message) => {
 
 async function generate_dalle_image(prompt) {
     try {
-        const response = await axios.post(`http://openai-service:80/generate-image`, {
+        const response = await axios.post(`${process.env.API_BASE_URL}/generate-image`, {
             prompt: prompt,
             size: '1024x1024',
         });

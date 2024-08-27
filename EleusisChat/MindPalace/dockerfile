@@ -1,21 +1,16 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+# Use the official Neo4j image
+FROM neo4j:4.4
 
-ENV PYTHONPATH=/app:/app/MindPalace
+# Install the required plugins by setting the environment variables
+ENV NEO4JLABS_PLUGINS='["apoc", "graph-data-science", "bloom"]'
 
-# Set environment variables
-ENV NEO4J_URI=$NEO4J_URI \
-    NEO4J_USER=$NEO4J_USER \
-    NEO4J_PASSWORD=$NEO4J_PASSWORD
+# Enable file imports and procedures
+ENV NEO4J_apoc_import_file_enabled=true
+ENV NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+ENV NEO4J_dbms_default_listen_address=0.0.0.0
 
-# Set the working directory in the container
-WORKDIR /app
+# Set the working directory in the container (if needed for custom configurations)
+WORKDIR /var/lib/neo4j
 
-# Copy all necessary files, including main.py, to the /app directory
-COPY . /app
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Run main.py when the container launches
-CMD ["python", "main.py"]
+# The default command will automatically start Neo4j
+CMD ["neo4j"]

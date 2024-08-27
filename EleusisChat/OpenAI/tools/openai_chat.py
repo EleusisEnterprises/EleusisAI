@@ -21,7 +21,7 @@ def generate_response(prompt):
                 {"role": "user", "content": prompt},
             ],
             max_tokens=3000,  # You can adjust this value based on your needs
-            n=2,
+            n=1,
             stop=None,
             temperature=1,
         )
