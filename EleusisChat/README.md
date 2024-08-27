@@ -1,7 +1,3 @@
-Based on a detailed review of the files within the `EleusisChat` directory and its submodules, here is an in-depth `README.md` that explains the specific details of each file, the code's functionality, and how the overall project works.
-
----
-
 # EleusisChat
 
 ## Overview
