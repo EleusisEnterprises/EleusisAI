@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request, jsonify
 from tools.openai_chat import generate_response
 from tools.openai_dalle import generate_dalle_image
-from tools.mindpalace_tools import create_user_note, create_ai_note, create_message_chain, link_notes
+from tools.conversational_mem import create_elly_message, create_user_message, link_messages
 from py2neo import Graph
 import os
 from config import get_config
@@ -19,7 +19,7 @@ app.config.from_object(config)
 logging.basicConfig(level=logging.INFO)  # Set the logging level
 logger = logging.getLogger(__name__)
 
-def connect_to_neo4j(retries=20, delay=5):
+def connect_to_neo4j(retries=0, delay=5):
     """
     Attempts to connect to the Neo4j database.
     Retries the connection attempt if it fails, up to a maximum number of retries.
@@ -50,8 +50,7 @@ def connect_to_neo4j(retries=20, delay=5):
     return None
 
 # Connect to Neo4j with retry logic
-graph = connect_to_neo4j(retries=10, delay=5)  # Adjust retries and delay as needed
-
+graph = connect_to_neo4j(retries=50, delay=10)  # Adjust retries and delay as needed
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -68,38 +67,17 @@ def ask():
 
         logger.info(f"Received prompt: {prompt}")
 
-        # Create a user note for the prompt
-        user_note = create_user_note(prompt)
+        # Create and store the user message
+        user_message = create_user_message(prompt)
 
-        # Check for existing context in the Zettelkasten
-        context_query = """
-        MATCH (n:Note)
-        WHERE n.title CONTAINS $prompt OR n.content CONTAINS $prompt
-        RETURN n.title, n.content
-        LIMIT 5
-        """
-        context = graph.run(context_query, prompt=prompt).data()
+        # Generate the response from Elly
+        elly_response = generate_response(prompt)
+        elly_message = create_elly_message(elly_response)
 
-        if context:
-            # If context exists, create a context-aware prompt
-            context_summary = "\n".join([f"{n['n.title']}: {n['n.content']}" for n in context])
-            enhanced_prompt = f"Based on the following information, {context_summary}, please answer: {prompt}"
-            ai_note = create_ai_note(enhanced_prompt)
-            logger.info(f"Generated context-aware response: {ai_note['content']}")
+        # Link the user message to the Elly response
+        link_messages(user_message, elly_message)
 
-            # Link new response to existing notes
-            for note in context:
-                link_notes(ai_note['title'], note['n.title'], "CONTEXT_OF")
-
-        else:
-            # No context exists, generate a fresh response
-            ai_note = create_ai_note(prompt)
-            logger.info(f"Generated response without context: {ai_note['content']}")
-
-        # Create the conversation chain by linking the user note and AI note
-        create_message_chain(user_note, ai_note)
-
-        return jsonify({'response': ai_note['content']})
+        return jsonify({'response': elly_response})
 
     except Exception as e:
         logger.error(f"Failed to process prompt: {str(e)}")

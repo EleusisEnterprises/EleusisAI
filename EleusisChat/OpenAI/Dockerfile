@@ -2,7 +2,8 @@
 FROM python:3.10-slim
 
 #Pass Python Root
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=.EleusisChat/
+ENV PYTHONPATH=.EleusisChat\OpenAI\tools/
 
 # Set environment variables
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}

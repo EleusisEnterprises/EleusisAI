@@ -7,51 +7,6 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
-client.once('ready', async () => {
-    console.log('Bot is online!');
-
-    // Function to check if the OpenAI server is ready
-    const checkServerHealth = async () => {
-        try {
-            const response = await axios.get(`${process.env.API_BASE_URL}/health`);
-            return response.status === 200;
-        } catch (error) {
-            console.error('OpenAI server health check failed:', error.message || error);
-            return false;
-        }
-    };
-
-    // Poll the health check endpoint until the server is ready
-    let serverReady = false;
-    while (!serverReady) {
-        serverReady = await checkServerHealth();
-        if (!serverReady) {
-            console.log('Waiting for the OpenAI server to be ready...');
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds before checking again
-        }
-    }
-
-    console.log('OpenAI server is ready. Sending welcome message...');
-
-    // Send the welcome message to a specific channel once the server is ready
-    try {
-        const prompt = 'Generate a brief and warm welcome message for new members, encouraging them to ask questions in the ask channel using the !ask command.';
-
-        // Call the OpenAI service to generate the welcome message
-        const response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
-
-        const channel = await client.channels.fetch(process.env.ELEUSIS_ANNOUNCEMENTS_CHANNEL_ID);
-        if (channel) {
-            await channel.send(`${response.data.response} @everyone`);
-            console.log('Welcome message sent successfully.');
-        } else {
-            console.error('Channel not found for sending the welcome message.');
-        }
-    } catch (error) {
-        console.error('Error generating or sending welcome message:', error.message || error);
-    }
-});
-
 // Function to split long messages into chunks
 function splitMessage(message, maxLength = 2000) {
     const messageChunks = [];
@@ -105,7 +60,7 @@ client.on('messageCreate', async (message) => {
             }
         } else {
             // General OpenAI GPT-4 prompt
-            prompt = `When responding to a user's !ask command, ensure the answer is crafted with both deep understanding and simplicity. User's question: "${userPrompt}"`;
+            prompt = userPrompt;
             console.log(`Sending prompt to OpenAI API: ${prompt}`);
             try {
                 response = await axios.post(`${process.env.API_BASE_URL}/ask`, { prompt });
