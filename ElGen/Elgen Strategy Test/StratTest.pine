@@ -12,8 +12,8 @@ i_bbwpLkbk = input.int(252, 'Lookback', minval=1, inline='2', group='BBWP Proper
 i_ma1On    = input.bool(true, '', inline='3', group='BBWP Properties')
 i_ma1Type  = input.string('SMA', 'BBWP MA Type', options=['SMA', 'EMA', 'VWMA'], inline='3', group='BBWP Properties')
 i_ma1Len   = input.int(5, 'Length', minval=1, inline='3', group='BBWP Properties')
-bbwpOverboughtLevel = input.int(50, 'BBWP Overbought Level', minval=1, maxval=100)
-bbwpOversoldLevel = input.int(50, 'BBWP Oversold Level', minval=1, maxval=100)
+bbwpOverboughtLevel = input.int(80, 'BBWP Overbought Level', minval=1, maxval=100)
+bbwpOversoldLevel = input.int(20, 'BBWP Oversold Level', minval=1, maxval=100)
 
 // EMA Length Inputs
 ema9Length = input.int(9, title="9 EMA Length")
@@ -72,10 +72,10 @@ plot(ema21, color=color.orange, title="EMA 21")
 plot(htf_ema21, color=color.green, title="HTF EMA 21", linewidth=2, offset=-1)
 plot(htf_ema55, color=color.red, title="HTF EMA 55", linewidth=2, offset=-1)
 
-// Plot SBBWP and its MA
+// Plot SBBWP in a separate window below the main chart
 plot(bbwp, title="BBWP", color=color.blue, linewidth=2)
 plot(bbwpMA1, title="BBWP MA", color=color.white, linewidth=1)
 
-// Plot Overbought and Oversold Levels for SBBWP on BBWP Plot
+// Plot Overbought and Oversold Levels for SBBWP in the separate window
 hline(bbwpOverboughtLevel, "BBWP Overbought Level", color=color.red, linestyle=hline.style_dashed)
 hline(bbwpOversoldLevel, "BBWP Oversold Level", color=color.green, linestyle=hline.style_dashed)
